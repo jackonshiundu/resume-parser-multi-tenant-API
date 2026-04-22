@@ -1,0 +1,14 @@
+[flake8]
+
+max-line-length = 88
+
+exclude =
+    migrations,
+    __pycache__,
+    manage.py,
+    wsgi.py
+
+per-file-ignores =
+    */tests/*.py: E501,W291,E302,E303
+    */apps.py: F401
+    */settings.py: E501
