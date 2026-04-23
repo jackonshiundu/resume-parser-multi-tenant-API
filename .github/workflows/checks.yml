@@ -15,6 +15,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - name: Create .env file from secrets
+        run: |
+          echo "DB_HOST=${{ secrets.DB_HOST }}" > .env
+          echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
+          echo "DB_USER=${{ secrets.DB_USER }}" >> .env
+          echo "DB_PASS=${{ secrets.DB_PASS }}" >> .env
+          echo "DB_PORT=${{ secrets.DB_PORT }}" >> .env
+
+      - name: Debug .env
+        run: cat .env
+
       - name: Tests
         run: docker compose run --rm app sh -c "python manage.py wait_for_db && python manage.py test"
 
