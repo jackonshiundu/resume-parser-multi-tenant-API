@@ -8,9 +8,12 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 from rest_framework import status
 
-CREATE_TENANT_URL = reverse("user:create")
-LOGIN_URL = reverse("user:login")
+from rest_framework_simplejwt.tokens import RefreshToken
 
+CREATE_TENANT_URL = reverse("tenant:create")
+LOGIN_URL = reverse("tenant:login")
+MANAGE_TENANT_URL = reverse("tenant:manage")
+TOKEN_REFRESH_URL = reverse("tenant:token_refresh")
 Tenant = get_user_model()
 
 
@@ -107,3 +110,58 @@ class PublicTenantApiTests(TestCase):
         res = self.client.post(LOGIN_URL, payload)
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertNotIn("token", res.data)
+
+
+class PrivateTenantApiTests(TestCase):
+    """Test API requests that require authentication."""
+
+    def setUp(self):
+        self.tenant = create_tenant(
+            email="test@example.com",
+            password="testpass123",
+            name="Test Name",
+            plan="free",
+        )
+        self.client = APIClient()
+        self.client.force_authenticate(user=self.tenant)
+
+    def test_retrieve_tenant_success(self):
+        """Test retrieving profile for logged in tenant."""
+        res = self.client.get(MANAGE_TENANT_URL)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.data["email"], self.tenant.email)
+        self.assertEqual(res.data["name"], self.tenant.name)
+
+    def test_update_tenant_success(self):
+        """Test updating the tenant profile for the authenticated tenant."""
+        payload = {"name": "New Name", "password": "newpassword123"}
+        res = self.client.patch(MANAGE_TENANT_URL, payload)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.tenant.refresh_from_db()
+        self.assertEqual(self.tenant.name, payload["name"])
+        self.assertTrue(self.tenant.check_password(payload["password"]))
+
+    def test_delete_tenant_success(self):
+        """Test deleting the tenant profile for the authenticated tenant."""
+        res = self.client.delete(MANAGE_TENANT_URL)
+
+        self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
+        tenant_exists = Tenant.objects.filter(id=self.tenant.id).exists()
+        self.assertFalse(tenant_exists)
+
+    def test_unauthenticated_access(self):
+        """Test that authentication is required for retrieving tenant profile."""
+        self.client.force_authenticate(user=None)
+        res = self.client.get(MANAGE_TENANT_URL)
+
+        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_refresh_token_success(self):
+        """Test refreshing JWT token successfully."""
+        refresh_payload = {"refresh": str(RefreshToken.for_user(self.tenant))}
+        res = self.client.post(TOKEN_REFRESH_URL, refresh_payload)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertIn("access", res.data)

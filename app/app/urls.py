@@ -26,5 +26,5 @@ urlpatterns = [
         SpectacularSwaggerView.as_view(url_name="apischema"),
         name="apidocs",
     ),
-    path("api/v1/user/", include("user.urls")),
+    path("api/v1/tenant/", include("user.urls")),
 ]

@@ -1,7 +1,10 @@
 """Views for the User APi"""
 import secrets
-from rest_framework import generics, status
+from rest_framework import generics, status, permissions
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework_simplejwt.views import TokenRefreshView
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
@@ -10,6 +13,11 @@ from drf_spectacular.utils import extend_schema
 from .serializers import TenantSerializer, LoginSerializer
 
 from core.models import APIKey
+
+
+@extend_schema(tags=["Token Management"])
+class CustomTokenRefreshView(TokenRefreshView):
+    pass
 
 
 @extend_schema(tags=["Tenant Management"])
@@ -61,3 +69,16 @@ class LoginView(APIView):
                 "refresh_token": str(refresh),
             }
         )
+
+
+@extend_schema(tags=["Tenant Management"])
+class ManageTenantView(generics.RetrieveUpdateDestroyAPIView):
+    """View, update, or delete the authenticated tenant."""
+
+    serializer_class = TenantSerializer
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        """Retrieve and return the authenticated user."""
+        return self.request.user

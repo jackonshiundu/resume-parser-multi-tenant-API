@@ -18,7 +18,21 @@ class TenantSerializer(serializers.ModelSerializer):
         }
 
     def create(self, validated_data):
+        """Create a new tenant with encrypted password and return it."""
         return get_user_model().objects.create_user(**validated_data)
+
+    def update(self, instance, validated_data):
+        """Update a tenant, setting the password correctly and return it."""
+        password = validated_data.pop("password", None)
+        tenant = super().update(instance, validated_data)
+        if password:
+            tenant.set_password(password)
+            tenant.save()
+        return tenant
+
+    def perform_destroy(self, instance):
+        """Delete the tenant and all related data."""
+        instance.delete()
 
 
 class LoginSerializer(serializers.Serializer):
