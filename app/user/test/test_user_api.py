@@ -5,6 +5,7 @@ from django.test import TestCase
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 
+from core.models import APIKey
 from rest_framework.test import APIClient
 from rest_framework import status
 
@@ -14,6 +15,13 @@ CREATE_TENANT_URL = reverse("tenant:create")
 LOGIN_URL = reverse("tenant:login")
 MANAGE_TENANT_URL = reverse("tenant:manage")
 TOKEN_REFRESH_URL = reverse("tenant:token_refresh")
+API_KEYS_URL = reverse("tenant:api_keys")
+
+
+def api_key_detail_url(key_id):
+    return reverse("tenant:api_key_detail", kwargs={"id": key_id})
+
+
 Tenant = get_user_model()
 
 
@@ -165,3 +173,43 @@ class PrivateTenantApiTests(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertIn("access", res.data)
+
+    def test_list_api_keys(self):
+        """Test listing API keys for the authenticated tenant."""
+        APIKey.objects.create(
+            tenant=self.tenant, key_hash=APIKey.hash_key("key_one"), label="production"
+        )
+        APIKey.objects.create(
+            tenant=self.tenant, key_hash=APIKey.hash_key("key_two"), label="staging"
+        )
+        res = self.client.get(API_KEYS_URL)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertIsInstance(res.data, list)
+        self.assertEqual(len(res.data), 2)
+
+    def test_create_api_key_successfully(self):
+        """Test creating a new API key for the authenticated tenant."""
+        payload = {"label": "test_key"}
+        res = self.client.post(API_KEYS_URL, payload)
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        self.assertIn("api_key", res.data)
+        self.assertEqual(res.data["label"], payload["label"])
+
+    def test_cannot_access_another_tenants_api_keys(self):
+        """Test that a tenant cannot access another tenant's API keys."""
+        other_tenant = create_tenant(
+            email="other@example.com",
+            password="otherpass123",
+            name="Other Name",
+            plan="free",
+        )
+        other_key = APIKey.objects.create(
+            tenant=other_tenant,
+            key_hash=APIKey.hash_key("other_key"),
+            label="other_key",
+        )
+        res = self.client.delete(api_key_detail_url(other_key.id))
+
+        self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)

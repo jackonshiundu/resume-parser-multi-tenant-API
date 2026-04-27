@@ -2,7 +2,7 @@
 Serializers for the user API view
 """
 from django.contrib.auth import get_user_model, authenticate
-
+from core.models import APIKey
 from rest_framework import serializers
 
 
@@ -74,3 +74,28 @@ class LoginSerializer(serializers.Serializer):
 
         data["tenant"] = tenant
         return data
+
+
+class APIKeySerializer(serializers.ModelSerializer):
+    """Serializer for listing API keys."""
+
+    class Meta:
+        model = APIKey
+        fields = ("id", "label", "is_active", "created_at", "last_used_at")
+        read_only_fields = ("id", "is_active", "created_at", "last_used_at")
+
+
+class APIKeyCreateSerializer(serializers.ModelSerializer):
+    """ "Serializer for creating API key."""
+
+    class Meta:
+        model = APIKey
+        fields = ("label",)
+
+
+class APIKeyUpdateSerializer(serializers.ModelSerializer):
+    """Serializer for updating API key."""
+
+    class Meta:
+        model = APIKey
+        fields = ("label", "is_active")

@@ -14,4 +14,8 @@ urlpatterns = [
     path(
         "token/refresh/", views.CustomTokenRefreshView.as_view(), name="token_refresh"
     ),
+    path("api-keys/", views.APIKeyListCreateView.as_view(), name="api_keys"),
+    path(
+        "api-keys/<uuid:id>/", views.APIKeyDetailView.as_view(), name="api_key_detail"
+    ),
 ]

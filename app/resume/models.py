@@ -4,6 +4,11 @@ from django.db import models
 from django.conf import settings
 
 
+def resume_upload_path(instance, filename):
+    """Generate upload path per tenant."""
+    return f"resumes/{instance.tenant.id}/{filename}"
+
+
 # Create your models here.
 class Resume(models.Model):
     """Central resume model. Parent of all extracted data"""
@@ -30,6 +35,7 @@ class Resume(models.Model):
         choices=SOURCE_TYPE,
     )
     raw_text = models.TextField(blank=True, null=True)
+    file = models.FileField(upload_to=resume_upload_path, null=True, blank=True)
     file_url = models.TextField(blank=True, null=True)
     linkedin_url = models.URLField(blank=True, null=True)
     status = models.CharField(
