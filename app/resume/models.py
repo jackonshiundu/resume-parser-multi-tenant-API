@@ -72,6 +72,7 @@ class Candidate(models.Model):
 
 class Skill(models.Model):
     """One row per skill extracted from the resume."""
+
     class Meta:
         unique_together = ("resume", "name")
 

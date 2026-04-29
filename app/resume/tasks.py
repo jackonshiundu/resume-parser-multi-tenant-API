@@ -51,7 +51,7 @@ def parse_resume(self, resume_id):
                 "phone": parsed_data.get("phone"),
                 "location": parsed_data.get("location"),
                 "summary": parsed_data.get("summary"),
-            }
+            },
         )
         # 4. Save skills
         for skill in parsed_data.get("skills", []):
@@ -60,7 +60,7 @@ def parse_resume(self, resume_id):
                 name=skill.get("name"),
                 defaults={
                     "category": skill.get("category"),
-                }
+                },
             )
 
         # 5. Save experience
@@ -76,7 +76,7 @@ def parse_resume(self, resume_id):
                     "is_current": exp.get("is_current", False),
                     "description": exp.get("description"),
                     "order": exp.get("order", 0),
-                }
+                },
             )
 
         # 6. Save education
@@ -91,7 +91,7 @@ def parse_resume(self, resume_id):
                     "end_date": edu.get("end_date"),
                     "grade": edu.get("grade"),
                     "order": edu.get("order", 0),
-                }
+                },
             )
 
         # 7. Save certifications
@@ -104,7 +104,7 @@ def parse_resume(self, resume_id):
                 expiry_date=cert.get("expiry_date"),
                 defaults={
                     "credential_id": cert.get("credential_id"),
-                }
+                },
             )
 
         # 8. Save languages
@@ -114,7 +114,7 @@ def parse_resume(self, resume_id):
                 name=lang.get("name"),
                 defaults={
                     "proficiency": lang.get("proficiency"),
-                }
+                },
             )
 
         # Mark as done

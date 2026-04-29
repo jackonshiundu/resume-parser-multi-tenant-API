@@ -38,10 +38,10 @@ class TenantRateThrottle(BaseThrottle):
 
             midnight = now.replace(hour=23, minute=59, second=59, microsecond=0)
 
-            self.wait_hours = (midnight - now).seconds//3600
+            self.wait_hours = (midnight - now).seconds // 3600
 
             return False
-        
+
         cache.incr(cache_key)
         return True
 
@@ -49,8 +49,9 @@ class TenantRateThrottle(BaseThrottle):
         """Return seconds until the rate limit resets."""
         return getattr(self, "wait_hours", None)
 
-    #def increment(self, tenant):
+        # def increment(self, tenant):
         """Increment the request count for today."""
+
     #    cache_key = self.generate_cache_key(str(tenant.id))
     #    cache.add(cache_key, 0, timeout=60 * 60 * 25)
     #   cache.incr(cache_key)
