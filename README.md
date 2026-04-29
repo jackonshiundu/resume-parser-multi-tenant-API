@@ -1,4 +1,3 @@
-```markdown
 # Resume Parser API
 
 A multi-tenant REST API that accepts resumes in multiple formats and returns clean, structured JSON data using Grok AI. Built with Django, Django REST Framework, Celery, Redis, and PostgreSQL.
@@ -70,11 +69,12 @@ Each developer registers an account and receives an API key. All resume endpoint
 ---
 
 ## Database schema diagram
+
 ```
 
 ![alt text](database-schema.png)
 
-````
+```
 
 ---
 
@@ -91,7 +91,7 @@ Each developer registers an account and receives an API key. All resume endpoint
 ```bash
 git clone https://github.com/yourusername/resume-parser-multi-tenant-api.git
 cd resume-parser-multi-tenant-api
-````
+```
 
 ### 2. Create your environment file
 
@@ -296,7 +296,3 @@ docker compose run --rm app sh -c "flake8 ."
 4. Uncomment the Anthropic section in `resume/ai.py`
 
 ---
-
-```
-
-```
