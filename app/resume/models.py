@@ -72,6 +72,8 @@ class Candidate(models.Model):
 
 class Skill(models.Model):
     """One row per skill extracted from the resume."""
+    class Meta:
+        unique_together = ("resume", "name")
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     resume = models.ForeignKey(Resume, on_delete=models.CASCADE, related_name="skills")

@@ -52,15 +52,11 @@ class ResumeListCreateView(generics.ListCreateAPIView):
         """Save a resume and increment rte limit counter."""
         resume = serializer.save(tenant=self.request.user)
 
-        self.request.auth
-        throttle = TenantRateThrottle()
-        throttle.increment(self.request.user)
-
         parse_resume.delay(str(resume.id))
         self.resume = resume
 
     def create(self, request, *args, **kwargs):
-        """Ovverride to return 202 with resume id."""
+        """Override to return 202 with resume id."""
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)

@@ -128,7 +128,7 @@ class ResumeListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Resume
-        fields = ("id", "source_type", "status", "created_at", "candidate_name")
+        fields = ("id", "source_type","status", "created_at", "candidate_name")
 
     def get_candidate_name(self, obj):
         if hasattr(obj, "candidate"):
