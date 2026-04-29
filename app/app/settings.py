@@ -145,11 +145,20 @@ AUTH_USER_MODEL = "core.Tenant"
 # drf-spectacular settings
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
-}
-SPECTACULAR_SETTINGS = {
-    "COMPONENT_SPLIT_REQUEST": True,
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticated",
+    ],
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ],
 }
 
+SPECTACULAR_SETTINGS = {
+    "COMPONENT_SPLIT_REQUEST": True,
+    "SWAGGER_UI_SETTINGS": {
+        "persistAuthorization": True,
+    },
+}
 # Redis settings
 REDIS_URL = os.environ.get("REDIS_URL", "redis://redis:6379/0")
 
@@ -170,7 +179,10 @@ CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 
 # anthropic API settings
-ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY")
+# ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY")
+
+# Option 2 I will use GROK
+GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
 
 # plan rate Limits
 PLAN_RATE_LIMITS = {

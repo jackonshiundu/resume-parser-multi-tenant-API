@@ -77,7 +77,7 @@ class LanguageSerializer(serializers.ModelSerializer):
         fields = ("id", "name", "proficiency")
 
 
-class ResumeSubmitSerializer(serializers.Serializer):
+class ResumeSubmitSerializer(serializers.ModelSerializer):
     """Serializer for submitting a resume file."""
 
     file = serializers.FileField(required=False)
@@ -106,9 +106,9 @@ class ResumeSubmitSerializer(serializers.Serializer):
 
         return data
 
-    def validate_file(Self, value):
+    def validate_file(self, value):
         allowed = [
-            "application.pdf",
+            "application/pdf",
             "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         ]
 

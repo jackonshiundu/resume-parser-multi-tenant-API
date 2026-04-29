@@ -1,10 +1,11 @@
 """Custom API key authentication for the resume API."""
 
-from datetime import timezone
+from django.utils import timezone
 import hashlib
 from core.models import APIKey
 from rest_framework.authentication import BaseAuthentication
 from rest_framework.exceptions import AuthenticationFailed
+from drf_spectacular.extensions import OpenApiAuthenticationExtension
 
 
 class APIKeyAuthentication(BaseAuthentication):
@@ -42,3 +43,15 @@ class APIKeyAuthentication(BaseAuthentication):
         api_key.save(update_fields=["last_used_at"])
 
         return (api_key.tenant, api_key)
+
+
+class APIKeyAuthenticationScheme(OpenApiAuthenticationExtension):
+    target_class = "resume.authentication.APIKeyAuthentication"
+    name = "ApiKeyAuth"
+
+    def get_security_definition(self, auto_schema):
+        return {
+            "type": "apiKey",
+            "in": "header",
+            "name": "X-API-Key",
+        }

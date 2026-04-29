@@ -12,12 +12,12 @@ class TenantRateThrottle(BaseThrottle):
 
     def generate_cache_key(self, tenant_id):
         """Generate redis key for today's Count."""
-        today = datetime.now(timezone.utc).strtime("%Y-%m-%d")
+        today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
         return f"rate:{tenant_id}:{today}"
 
     def get_limit(self, tenant):
         """Get the daily limit for the tenant's plan."""
-        return settings.PLAN_LIMITS.get(tenant.plan)
+        return settings.PLAN_RATE_LIMITS.get(tenant.plan)
 
     def allow_request(self, request, view):
         """Check if tenant is within daily limit."""
@@ -36,7 +36,7 @@ class TenantRateThrottle(BaseThrottle):
             # calculate seconds until midnight UTC for reset time.
             now = datetime.now(timezone.utc)
 
-            midnight = now.replace(hours=23, minute=59, second=59, microsecond=0)
+            midnight = now.replace(hour=23, minute=59, second=59, microsecond=0)
 
             self.wait_seconds = (midnight - now).seconds
 

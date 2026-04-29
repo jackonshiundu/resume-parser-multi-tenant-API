@@ -1,14 +1,16 @@
-"""Celery Tasks form resume parsing."""
+"""Celery Tasks for resume parsing."""
 from celery import shared_task
 from django.utils import timezone
 import logging
+from .extractors import extract_text
+from .ai import parse_resume_with_ai
 
 logger = logging.getLogger(__name__)
 
 
 @shared_task(bind=True, max_retries=3)
 def parse_resume(self, resume_id):
-    """Background tasks to parse a resume."""
+    """Background task to parse a resume."""
 
     from .models import (
         Resume,
@@ -19,20 +21,23 @@ def parse_resume(self, resume_id):
         Certification,
         Language,
     )
-    from .extractors import extract_text
-    from .ai import parse_resume_with_ai
+
+    # Fetch resume separately so we can always reference it in except block
+    try:
+        resume = Resume.objects.get(id=resume_id)
+    except Resume.DoesNotExist:
+        logger.error(f"Resume {resume_id} not found.")
+        return
 
     try:
-        resume = Resume.objects.get(id)
+        # Update status to processing
+        Resume.objects.filter(id=resume_id).update(status="processing")
+        resume.refresh_from_db()
 
-        # updating the status to processing for the resume.
-        resume.status = "processing"
-        resume.save()
-
-        # 1. Extract raw text.
+        # 1. Extract raw text
         raw_text = extract_text(resume)
-        resume.raw_text = raw_text
-        resume.save()
+        Resume.objects.filter(id=resume_id).update(raw_text=raw_text)
+        resume.refresh_from_db()
 
         # 2. Send to Claude
         parsed_data = parse_resume_with_ai(raw_text)
@@ -54,6 +59,7 @@ def parse_resume(self, resume_id):
                 name=skill.get("name"),
                 category=skill.get("category"),
             )
+
         # 5. Save experience
         for exp in parsed_data.get("experience", []):
             Experience.objects.create(
@@ -99,20 +105,16 @@ def parse_resume(self, resume_id):
                 proficiency=lang.get("proficiency"),
             )
 
-        # save the resume as done
-        resume.status = "done"
-        resume.parsed_at = timezone.now()
-        resume.save()
+        # Mark as done
+        Resume.objects.filter(id=resume_id).update(
+            status="done", parsed_at=timezone.now()
+        )
 
         logger.info(f"Resume {resume_id} parsed successfully.")
 
-    except Resume.DoesNotExist:
-        logger.error(f"Resume {resume_id} not found, please try with a working resume.")
-
     except Exception as exc:
         logger.error(f"Resume {resume_id} failed: {str(exc)}")
-        resume.status = "failed"
-        resume.error_message = str(exc)
-
-        resume.save()
+        Resume.objects.filter(id=resume_id).update(
+            status="failed", error_message=str(exc)
+        )
         raise self.retry(exc=exc, countdown=60)

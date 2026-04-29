@@ -23,7 +23,9 @@ RUN apk add --no-cache postgresql-client && \
         pip install -r /tmp/requirements.dev.txt; \
     fi && \
     apk del .tmp-build-deps && \
-    adduser --disabled-password --no-create-home django-user
+    adduser --disabled-password --no-create-home django-user && \
+    mkdir -p /vol/web /vol/media/resumes && \
+    chown -R django-user:django-user /vol
 
 COPY ./app /app
 
