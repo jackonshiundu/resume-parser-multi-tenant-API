@@ -70,11 +70,7 @@ Each developer registers an account and receives an API key. All resume endpoint
 
 ## Database schema diagram
 
-```
-
 ![alt text](database-schema.png)
-
-```
 
 ---
 
@@ -296,3 +292,7 @@ docker compose run --rm app sh -c "flake8 ."
 4. Uncomment the Anthropic section in `resume/ai.py`
 
 ---
+
+```
+
+```
