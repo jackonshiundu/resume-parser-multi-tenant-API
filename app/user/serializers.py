@@ -42,6 +42,8 @@ class LoginSerializer(serializers.Serializer):
     password = serializers.CharField(
         style={"input_type": "password"},
         trim_whitespace=False,
+        allow_blank=False,
+        required=True,
     )
 
     def validate(self, data):

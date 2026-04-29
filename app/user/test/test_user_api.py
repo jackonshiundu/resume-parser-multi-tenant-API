@@ -116,7 +116,7 @@ class PublicTenantApiTests(TestCase):
         create_tenant(**tenant_details)
         payload = {"email": tenant_details["email"], "password": ""}
         res = self.client.post(LOGIN_URL, payload)
-        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertNotIn("token", res.data)
 
 
